@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+WORKDIR /APP
+
+# Instalar dependências do sistema e ODBC Driver
+RUN apt-get update && \
+    apt-get install -y curl gnupg unixodbc-dev && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Instalar dependências Python (requirements.txt da raiz do projeto)
+COPY ["requirements.txt", "./requirements.txt"]
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código da aplicação (apenas pasta do Dashboard)
+COPY ["3 - Dashboard/", "./"]
+
+# Copiar script de espera do banco
+COPY ["3 - Dashboard/wait-for-db.sh", "/wait-for-db.sh"]
+RUN chmod +x /wait-for-db.sh
+
+ENTRYPOINT ["/wait-for-db.sh"]
+

@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 40px 20px; /* margem para espaçamento geral na página */
+            /* remove flex para alinhar o conteúdo normal */
+        }
+        .content-box {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 700px; /* aumenta largura máxima */
+            margin: 0 auto; /* centraliza horizontalmente */
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 25px;
+            color: #8C0436;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+            text-align: justify; /* para um alinhamento de texto mais profissional */
+        }
+        .btn-custom {
+            background-color: #8C0436;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #F23545;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="content-box">
+        <h1>Efeito Idade Relativa</h1>
+        <p>
+            O Efeito Idade Relativa é um fenômeno que ocorre devido a um viés de seleção no agrupamento de jogadores para formação de um time. 
+            Quando o agrupamento é feito com base no ano de nascimento, jogadores nascidos no início do ano tendem a ser mais desenvolvidos fisicamente
+            e cognitivamente em comparação com aqueles nascidos no final do ano. Isso pode resultar em uma vantagem 
+            significativa para os jogadores mais velhos dentro do mesmo grupo etário,afetando suas oportunidades de seleção e desenvolvimento.
+        </p>
+        <p>
+            Esse projeto visa analisar a presença e o impacto do Efeito Idade Relativa nas seleções de futebol das Copas do Mundo,
+            buscando compreender como esse fenômeno influencia a composição dos times e o desempenho dos jogadores ao longo do tempo.
+        </p>
+        <img src="{{ url_for('static', filename='images/grafico_linhas.png') }}" alt="Grafico de Linhas" class="logo mx-auto d-block mb-4" style="max-width: 300px;">
+        <p>
+            A análise do Efeito Idade Relativa no contexto das Copas do Mundo foi uma iniciativa que surgiu como parte de um Trabalho de Conclusão de Curso (TCC) 
+            do discente Ítalo José Silva Reis curso de Bacharelado em Ciência e Tecnologia da Universidade Federal do Maranhão (UFMA). O Projeto foi desenvolvido em colaboração com o
+            Professor Dr.Paulo Rogerio de Almeida Ribero do núcleo de Engenharia da Computação e  Dr. Christian Emmanuel Torres Cabido do núcleo de Educação Física. 
+        </p>
+
+        <p>Clique abaixo para acessar o dashboard:</p>
+        <a href="/dashboard/" class="btn btn-custom">Ir para o Dashboard</a>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- CSS personalizado -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .logo {
+            display: block;
+            max-width: 300px; /* mesmo tamanho da logo do login */
+            height: auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn-custom {
+            background-color: #8C0436;  /* cor customizada */
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #F23545;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+
+            <!-- Logo centralizada -->
+            <img src="{{ url_for('static', filename='images/logo_sempre_mais_ufma.png') }}" alt="Logo" class="logo mx-auto d-block mb-4" style="max-width: 300px;">
+
+            <h2>Cadastro</h2>
+
+            <!-- Exibir mensagens flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-4">
+                    <label for="nome" class="form-label">Nome:</label>
+                    <input type="text" class="form-control" name="nome" id="nome" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="email" class="form-label">E-mail:</label>
+                    <input type="email" class="form-control" name="email" id="email" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="senha" class="form-label">Senha:</label>
+                    <input type="password" class="form-control" name="senha" id="senha" required>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-custom">Cadastrar</button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <p>Já tem conta? <a href="{{ url_for('login') }}">Faça login</a></p>
+                </div>
+            </form>
+
+        </d

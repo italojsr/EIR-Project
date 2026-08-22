@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- CSS personalizado -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .logo {
+            display: block;
+            max-width: 150px; /* Tamanho máximo da logo */
+            height: auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .btn-custom {
+            background-color: #8C0436;  
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #F23545;  
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4"> <!-- Largura do formulário -->
+            <img src="{{ url_for('static', filename='images/logo_ufma.jpg') }}" alt="Logo" class="logo mx-auto d-block mb-4" style="max-width: 150px;">
+            
+            <h3 class="text-center mb-3">Efeito Idade Relativa</h3>
+            
+            <!-- Exibir mensagens flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-4">
+                    <label for="usuario" class="form-label">Usuário:</label>
+                    <input type="text" class="form-control" name="usuario" id="usuario" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="senha" class="form-label">Senha:</label>
+                    <input type="password" class="form-control" name="senha" id="senha" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-custom">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

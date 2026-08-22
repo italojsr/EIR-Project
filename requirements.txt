@@ -1,0 +1,14 @@
+dotenv==0.9.9
+# Core data/DB
+pandas==2.3.1
+numpy==2.3.2
+SQLAlchemy==2.0.43
+pyodbc==5.2.0
+
+# Web stack
+Flask==3.0.3
+Werkzeug==3.0.3
+
+# Dash/Plotly (compatible with Flask 3)
+dash==2.17.1
+plotly==5.24.1
