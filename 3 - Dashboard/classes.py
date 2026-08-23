@@ -1,6 +1,12 @@
 
 import pandas as pd
 import numpy as np
+from pathlib import Path
+
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+WORLD_CUP_PLAYERS_DIR = ROOT_DIR / '1 - Web Scrapping' / '3 - WorldCup DataFrames' / 'worldcupfootball+wikipedia'
+WORLD_CUP_QUARTERS_DIR = ROOT_DIR / '1 - Web Scrapping' / '4 - Quarters' / 'World cups Quarters' / 'Quarters (MultiColumns)'
 
 
 class Worldcup:
@@ -25,8 +31,8 @@ class Worldcup:
 class WorldcupPlayers(Worldcup):
     def __init__(self,worldcup_name):
         
-        file_path = "C:/Users/italo/OneDrive/Documentos/GitHub/TCC/WorldCup DataFrames/worldcupfootball+wikipedia/{}.csv".format(worldcup_name)
-        super().__init__(file_path) #Initialize the attributes of the parent class
+        file_path = WORLD_CUP_PLAYERS_DIR / f"{worldcup_name}.csv"
+        super().__init__(str(file_path)) #Initialize the attributes of the parent class
 
     def get_players_from_team(self,team_name):
         # Returns an object Players which contains a dataframe with information of the player from the especified team.
@@ -43,8 +49,8 @@ class WorldcupPlayers(Worldcup):
 
 class WorldcupQuarters(Worldcup):
     def __init__(self,worldcup_name):
-        file_path = "C:/Users/italo/OneDrive/Documentos/GitHub/TCC/Quarters/World cups Quarters/Quarters (MultiColumns)/{} quarters (MultiColumns).csv".format(worldcup_name)
-        super().__init__(file_path)
+        file_path = WORLD_CUP_QUARTERS_DIR / f"{worldcup_name} quarters (MultiColumns).csv"
+        super().__init__(str(file_path))
     def get_quarters_from_team(self,team_name):
         # Returns an object Quarters which contains a dataframe for the especified team
         quarters_from_team = Team_Quarters(self.with_multicolumns()[team_name],team_name)

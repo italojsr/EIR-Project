@@ -1,7 +1,7 @@
 import dash
 from dash import Dash
 from dash import html,dash_table,dcc
-from dash.dependencies import Input,Output
+from dash.dependencies import Input,Output,State
 import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
@@ -55,14 +55,15 @@ class Dashboard:
 
         # New version without classes
         df_quarter = pd.read_csv('wcup_has_teams.csv', encoding='utf-8-sig',sep =';',index_col = 3)
-        year_wcup = 2022
+        year_wcup = int(worldcups[0].split(' ')[0])
         filtro_ano = (df_quarter['YEAR'] == year_wcup)
 
         # Take all teams that played in the selected year
         team_names = df_quarter[filtro_ano]['TEAM'].unique()
 
         # Take the quartiles of a specific team
-        filtro_time = (df_quarter['TEAM'] == 'Argentina')
+        default_team = team_names[0] if len(team_names) > 0 else 'Argentina'
+        filtro_time = (df_quarter['TEAM'] == default_team)
         df_quarter = df_quarter[['N_PLAYERS','FIRST_QUARTILE','SECOND_QUARTILE','THIRD_QUARTILE','FORTH_QUARTILE']]
         df_quarter = df_quarter[np.logical_and(filtro_ano,filtro_time)].T
         df_quarter.rename({'N_PLAYERS':'Total','FIRST_QUARTILE':'First Quarter','SECOND_QUARTILE':'Second Quarter','THIRD_QUARTILE':'Third Quarter','FORTH_QUARTILE':'Forth Quarter'},inplace = True)
@@ -397,25 +398,45 @@ class Dashboard:
             year = selected_worldcup.split(' ')[0]
             with self.engine.connect() as connection:
 
-                quarters_df = pd.read_sql(f"SELECT TOTAL AS Total,\
-                        FIRST_QUARTER AS First_Quarter,\
-                        SECOND_QUARTER AS Second_Quarter,\
-                        THIRD_QUARTER AS Third_Quarter,\
-                        FORTH_QUARTER AS Forth_Quarter\
-                        FROM WCUP_HAS_TEAMS_TABLE \
-                        WHERE TEAM = '{selected_team}' AND YEAR = '{year}'",connection)
-            quarters_df = quarters_df.T
-            quarters_df.reset_index(inplace = True)
-            quarters_df.columns = ['','Frequence', 'Percentage(%)']
+                quarters_df = pd.read_sql(
+                    text("""
+                        SELECT TYPE, TOTAL, FIRST_QUARTER, SECOND_QUARTER, THIRD_QUARTER, FORTH_QUARTER
+                        FROM WCUP_HAS_TEAMS_TABLE
+                        WHERE TEAM = :team AND YEAR = :year
+                    """),
+                    connection,
+                    params={"team": selected_team, "year": int(year)}
+                )
+
+            if quarters_df.empty:
+                empty_df = pd.DataFrame(columns=['', 'Frequence', 'Percentage(%)'])
+                return empty_df.to_dict('records'), [{"name": i, "id": i} for i in empty_df.columns]
+
+            freq_row = quarters_df[quarters_df['TYPE'] == 'Frequence']
+            perc_row = quarters_df[quarters_df['TYPE'] == 'Percentage(%)']
+
+            if freq_row.empty or perc_row.empty:
+                empty_df = pd.DataFrame(columns=['', 'Frequence', 'Percentage(%)'])
+                return empty_df.to_dict('records'), [{"name": i, "id": i} for i in empty_df.columns]
+
+            freq_row = freq_row.iloc[0]
+            perc_row = perc_row.iloc[0]
+            quarters_df = pd.DataFrame({
+                '': ['Total', 'First_Quarter', 'Second_Quarter', 'Third_Quarter', 'Forth_Quarter'],
+                'Frequence': [freq_row['TOTAL'], freq_row['FIRST_QUARTER'], freq_row['SECOND_QUARTER'], freq_row['THIRD_QUARTER'], freq_row['FORTH_QUARTER']],
+                'Percentage(%)': [perc_row['TOTAL'], perc_row['FIRST_QUARTER'], perc_row['SECOND_QUARTER'], perc_row['THIRD_QUARTER'], perc_row['FORTH_QUARTER']]
+            })
             data = quarters_df.to_dict('records')
             columns = [{"name": i, "id": i} for i in quarters_df.columns]
             return data,columns
 
 
 
-        @app.callback(Output('teams_dropdown','options'),
-                    Input('wcups_dropdown','value'))
-        def update_teams_dropdown(selected_worldcup):
+        @app.callback([Output('teams_dropdown','options'),
+                      Output('teams_dropdown','value')],
+                    [Input('wcups_dropdown','value')],
+                    [State('teams_dropdown','value')])
+        def update_teams_dropdown(selected_worldcup, current_team):
             #selected_worldcup - String with the year of the game and the host e.g (1930 Uruguay, 1934 Italy)
             year = selected_worldcup.split(' ')[0]
             with self.engine.connect() as connection:
@@ -423,7 +444,13 @@ class Dashboard:
                 df = pd.read_sql("SELECT * FROM WCUP_HAS_TEAMS_TABLE",connection)
             filtro = (df['YEAR'] == int(year))
             teams_options = list(df[filtro]['TEAM'].unique())
-            return teams_options
+            if not teams_options:
+                return [], None
+
+            if current_team in teams_options:
+                return teams_options, current_team
+
+            return teams_options, teams_options[0]
 
 
         ############################################################## Pie Charts #########################################################
@@ -445,16 +472,26 @@ class Dashboard:
                 df = pd.read_sql("SELECT * FROM WCUP_HAS_TEAMS_TABLE",connection)
 
             year = int(selected_worldcup.split(' ')[0])
-            updated_df = df[(df['TEAM'] == selected_team) & (df['YEAR'] == year)].T
-            updated_df = updated_df.drop(['YEAR','TEAM','TYPE','TOTAL'],axis= 0)
-            updated_df.columns = ['Frequence', 'Percentage(%)']
-            updated_df.rename({'FIRST_QUARTER':'First Quarter','SECOND_QUARTER':'Second Quarter','THIRD_QUARTER':'Third Quarter','FORTH_QUARTER':'Forth Quarter'},inplace =True)
-            updated_df = updated_df.astype('float')
+            updated_df = df[(df['TEAM'] == selected_team) & (df['YEAR'] == year)]
+
+            freq_row = updated_df[updated_df['TYPE'] == 'Frequence']
+            if freq_row.empty:
+                return go.Figure()
+
+            freq_row = freq_row.iloc[0]
+            pie_values = np.array([
+                float(freq_row['FIRST_QUARTER']),
+                float(freq_row['SECOND_QUARTER']),
+                float(freq_row['THIRD_QUARTER']),
+                float(freq_row['FORTH_QUARTER'])
+            ])
+
             label_df2 = ['First Quarter','Second Quarter','Third Quarter','Forth Quarter']  
             colors_pie1 = [colors['First Quarter'],colors['Second Quarter'],colors['Third Quarter'],colors['Forth Quarter']]
-            smaller_slice_color = colors[updated_df['Frequence'][1:].idxmin()] 
+            min_idx = int(np.argmin(pie_values))
+            smaller_slice_color = colors[label_df2[min_idx]]
             fig = go.Figure(data = go.Pie(labels = label_df2,
-                                        values = updated_df['Frequence'].values,
+                                        values = pie_values,
                                         textinfo ='percent',
                                         name = 'Gráfico1',
                                         marker = dict(colors = colors_pie1),
@@ -483,16 +520,24 @@ class Dashboard:
 
                 df = pd.read_sql("SELECT YEAR,TEAM,TYPE,FIRST_QUARTER + SECOND_QUARTER AS FIRST_AND_SECOND_QUARTER,THIRD_QUARTER,FORTH_QUARTER FROM WCUP_HAS_TEAMS_TABLE",connection)
             year = int(selected_worldcup.split(' ')[0])
-            updated_df = df[(df['TEAM'] == selected_team) & (df['YEAR'] == year)].T
-            updated_df = updated_df.drop(['YEAR','TEAM','TYPE'],axis= 0)
-            updated_df.columns = ['Frequence', 'Percentage(%)']
-            updated_df = updated_df.astype('float')
+            updated_df = df[(df['TEAM'] == selected_team) & (df['YEAR'] == year)]
+
+            freq_row = updated_df[updated_df['TYPE'] == 'Frequence']
+            if freq_row.empty:
+                return go.Figure()
+
+            freq_row = freq_row.iloc[0]
+            pie_values = np.array([
+                float(freq_row['FIRST_AND_SECOND_QUARTER']),
+                float(freq_row['THIRD_QUARTER']),
+                float(freq_row['FORTH_QUARTER'])
+            ])
             label_df = ['First and Second','Third Quarter','Forth Quarter']
             colors_pie = ['#099C1D',colors['Third Quarter'],colors['Forth Quarter']]
             
             
             fig = go.Figure(data = go.Pie(labels = label_df,
-                                        values = updated_df['Frequence'].values,
+                                        values = pie_values,
                                         
                                         textinfo ='percent',
                                         name = 'Gráfico2',

@@ -10,6 +10,7 @@ from sqlalchemy import text
 
 # Get database parameters from environment (works in Docker and local)
 server, database, username, password, driver = get_db_params()
+print(f"Connecting to database: {database} on server: {server} with user: {username}")
 engine = database_connection(server, database, username, password, driver)  # Conexão com o banco de dados
 server = Flask(__name__)  # Inicializa o servidor Flask
 server.secret_key = 'secret_key'  # Chave secreta para sessões

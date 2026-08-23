@@ -3,19 +3,32 @@ import sys
 import numpy as npa
 import pandas as pd
 from dotenv import load_dotenv
+from pathlib import Path
 from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base
 from werkzeug.security import generate_password_hash
 
+# Resolve paths from this file location so Docker working_dir does not matter.
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
 
-web_scrapping_path = os.path.join('..', '1 - Web Scrapping')
-def db_join(name): return os.path.join('..', '2 - Database', name)
-def pjoin(name): return os.path.join(web_scrapping_path, name)
+WEB_DIR_CANDIDATES = [
+    PROJECT_ROOT / '1 - Web Scrapping',
+    Path('/workspace/web-scrapping'),
+]
+web_scrapping_path = next((p for p in WEB_DIR_CANDIDATES if p.exists()), WEB_DIR_CANDIDATES[0])
+
+def db_join(name):
+    return str(SCRIPT_DIR / name)
+
+def pjoin(name):
+    return str(web_scrapping_path / name)
 
 # Variáveis de ambiente lidas de db.env
 env_path = db_join('db.env')
-load_dotenv(env_path, override=True)
+# Keep values already provided by the container (e.g. DB_SERVER=db in docker-compose).
+load_dotenv(env_path, override=False)
 
 DB_SERVER = os.getenv('DB_SERVER')
 DB_NAME = os.getenv('DB_DATABASE')
@@ -30,7 +43,7 @@ with open(pjoin('name_of_all_worldcups.txt'), 'r', newline='') as f:
 with open(pjoin('name_of_all_teams.txt'), 'r', newline='') as f:
     name_of_all_teams = f.read().splitlines(False)
 
-missing_vars = [name for name, value in {'DB_SERVER': DB_SERVER, 'DB_DATABASE': DB_NAME, 'DB_USERNAME': DB_USER, 'DB_PASSWORD': DB_PASSWORD, 'DB_DRIVER': ODBC_DRIVER}.items() if not value]
+missing_vars = [name for name, value in {'DB_SERVER': DB_SERVER, 'DB_DATABASE': DB_NAME, 'DB_USER': DB_USER, 'DB_PASSWORD': DB_PASSWORD, 'DB_DRIVER': ODBC_DRIVER}.items() if not value]
 if missing_vars:
     raise ValueError(f"Missing environment variables in db.env: {', '.join(missing_vars)}")
 
