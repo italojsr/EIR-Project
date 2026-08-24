@@ -1,15 +1,25 @@
-# EIR Project - Relative Age Effect in Football
+# EIR Project - Relative Age Effect in Professional Football
 
 This project analyzes the Relative Age Effect (RAE) in FIFA World Cup football using a step-by-step workflow: data collection, database modeling, dashboard visualization, and Docker deployment.
+
+
+## Main Results
+
+1. **Exploratory Data Analysis**
+   -- The percentage of players born in the first quarter of the year is highest (30.2%) among players who have participated in the most World Cup editions
+   -- Consistent with the literature, defender and goalkeeper are the positions with the highest RAE among players who have participated in at least four World Cup editions.
+   -- Using the Odds Ratio, the number of team compositions with significant RAE increases with the number of World Cup editions the team has played in. (e.g., Brazil has played in 22 editions and has 17 compositions with significant RAE)
+2. **Binary Classification**
+   -- The class imbalance led to poor performance across the three algorithms trained despite the use of data augmentation techniques such as SMOTE.
 
 ## Project logical order
 
 1. **Web Scraping**
-   - Collect and organize base data for World Cups and players.
+   - Collect and organize data from 22 World Cups and more than 8000 players.
    - Main folder: `1 - Web Scrapping/`
 
 2. **Database creation**
-   - Transform CSV files into SQL Server tables.
+   - Transform CSV files into SQL Server tables (Relational Database).
    - Main build/load script: `2 - Database/2 - building database.py`
    - Environment configuration: `2 - Database/db.env`
 
@@ -24,86 +34,8 @@ This project analyzes the Relative Age Effect (RAE) in FIFA World Cup football u
    - Main file: `4 - Docker/docker-compose.yml`
 
 5. **Additional analysis**
-   - Extra notebooks and exploratory analysis.
+   - Exploratory analysis
+   - Binary Classification (Logistic Regression, Random Forest, XGBoost)
    - Main folder: `5 - Data Analysis/`
 
----
 
-## Folder structure summary
-
-- `1 - Web Scrapping/` - initial data collection and preparation
-- `2 - Database/` - scripts and files for DB creation/population
-- `3 - Dashboard/` - Flask/Dash application
-- `4 - Docker/` - compose and container infrastructure
-- `5 - Data Analysis/` - analysis notebooks
-
----
-
-## Requirements
-
-- Python 3.11+
-- Docker and Docker Compose
-- SQL Server (for non-Docker/local execution)
-- ODBC Driver 17 for SQL Server
-
----
-
-## Environment variables
-
-Database settings are stored in `2 - Database/db.env`.
-
-Example keys used in this project:
-
-- `DB_SERVER`
-- `DB_DATABASE`
-- `DB_USER`
-- `DB_PASSWORD`
-- `DB_DRIVER`
-
-> `db.env` is listed in `.gitignore` and should never be published.
-
----
-
-## Run with Docker (recommended workflow)
-
-From the repository root:
-
-1. Update `2 - Database/db.env` with your values.
-2. Start services using the compose file in `4 - Docker`:
-
-```bash
-docker compose -f "4 - Docker/docker-compose.yml" up --build
-```
-
-Expected services:
-
-- `db`: SQL Server
-- `db_init`: creates and populates tables
-- `app`: starts the dashboard
-
-Dashboard URL:
-
-- `http://localhost:935`
-
----
-
-## Run locally (without Docker)
-
-1. Configure local SQL Server.
-2. Update `2 - Database/db.env` for local settings.
-3. Run the database build/population script:
-
-```bash
-python "2 - Database/2 - building database.py"
-```
-
-4. Run the dashboard app:
-
-```bash
-python "3 - Dashboard/app.py"
-```
-
----
-
-## Notes
-- After changing Docker environment variables, recreate containers so changes are applied.
