@@ -39,7 +39,7 @@
         <div class="col-md-4"> <!-- Largura do formulário -->
             <img src="{{ url_for('static', filename='images/logo_ufma.jpg') }}" alt="Logo" class="logo mx-auto d-block mb-4" style="max-width: 150px;">
             
-            <h3 class="text-center mb-3">Efeito Idade Relativa</h3>
+            <h3 class="text-center mb-3">Relative Age Effect</h3>
             
             <!-- Exibir mensagens flash -->
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -55,16 +55,16 @@
 
             <form method="POST">
                 <div class="mb-4">
-                    <label for="usuario" class="form-label">Usuário:</label>
+                    <label for="usuario" class="form-label">User:</label>
                     <input type="text" class="form-control" name="usuario" id="usuario" required>
                 </div>
 
                 <div class="mb-4">
-                    <label for="senha" class="form-label">Senha:</label>
+                    <label for="senha" class="form-label">Password:</label>
                     <input type="password" class="form-control" name="senha" id="senha" required>
                 </div>
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-custom">Entrar</button>
+                    <button type="submit" class="btn btn-custom">Login</button>
                 </div>
             </form>
         </div>

@@ -27,7 +27,7 @@ This project analyzes the Relative Age Effect (RAE) in FIFA World Cup football u
    - Flask + Dash web app for indicators and visual analytics.
    - Main files: `3 - Dashboard/app.py`, `3 - Dashboard/dashboard.py`, `3 - Dashboard/db_con.py`
 
-   ![Dashboard prototype](3%20-%20Dashboard/Dashboard-Prototype.png)
+   ![Dashboard prototype](<3 - Dashboard/dashboard images/Dashboard-Prototype.png>)
 
 4. **Dockerization**
    - Service orchestration (`db`, `db_init`, `app`) via Docker Compose.
@@ -38,4 +38,11 @@ This project analyzes the Relative Age Effect (RAE) in FIFA World Cup football u
    - Binary Classification (Logistic Regression, Random Forest, XGBoost)
    - Main folder: `5 - Data Analysis/`
 
+## Dashboard
+
+![First part Dashboard](<3 - Dashboard/dashboard images/First part dashboard.png>)
+
+![Second part Dashboard](<3 - Dashboard/dashboard images/Second Part Dashboard.png>)
+
+![Third part Dashboard](<3 - Dashboard/dashboard images/Third Part Dashboard.png>)
 
