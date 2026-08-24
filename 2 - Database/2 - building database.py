@@ -341,7 +341,7 @@ try:
         try:
             users = Users_Table(connection)
             users.create_users_table()
-            users.insert_admin("EIR_UFMA", "EIR@ufma.com.br","EIR@2025")
+            users.insert_admin("admin", "EIR@ufma.com.br","admin")
             print("USERS_TABLE criada.")
         except Exception as e:
             print(f"Erro em USERS_TABLE: {e}")

@@ -19,7 +19,8 @@ class Dashboard:
         self.app = Dash(
             __name__,
             server=server,
-            routes_pathname_prefix='/dashboard/'
+            routes_pathname_prefix='/dashboard/',
+            assets_folder=str(Path(__file__).parent / 'assets')
         )
         self.engine = engine
 
@@ -66,7 +67,7 @@ class Dashboard:
         filtro_time = (df_quarter['TEAM'] == default_team)
         df_quarter = df_quarter[['N_PLAYERS','FIRST_QUARTILE','SECOND_QUARTILE','THIRD_QUARTILE','FORTH_QUARTILE']]
         df_quarter = df_quarter[np.logical_and(filtro_ano,filtro_time)].T
-        df_quarter.rename({'N_PLAYERS':'Total','FIRST_QUARTILE':'First Quarter','SECOND_QUARTILE':'Second Quarter','THIRD_QUARTILE':'Third Quarter','FORTH_QUARTILE':'Forth Quarter'},inplace = True)
+        df_quarter.rename({'N_PLAYERS':'Total','FIRST_QUARTILE':'First Quarter','SECOND_QUARTILE':'Second Quarter','THIRD_QUARTILE':'Third Quarter','FORTH_QUARTILE':'Fourth Quarter'},inplace = True)
         displayed_team = df_quarter
         '''
         default_worldcup = WorldcupQuarters('2022 Qatar')
@@ -113,17 +114,15 @@ class Dashboard:
         default_year = 1930
         default_team = 'Argentina'
         app = self.app
-        colors = {'title':'black','text':'black','background':'white','boxplot':'#B5BD13','td':'#FFFFFF','tr':'black',
-                'First Quarter':'#CD0B0B','Second Quarter':'#FF6C4D','Third Quarter':'#55B8CE','Forth Quarter':'#005165'}
-        font_style = 'Arial'
+        colors = {'title':"#371f1f",'text':'#374151','background':'#ffffff','boxplot':'#B5BD13','td':'#FFFFFF','tr':'#374151',
+            'First Quarter':'#2C82B5','Second Quarter':'#015C91','Third Quarter':'#57AEE7','Fourth Quarter':'#8B9EAA'}
+        pie_colors = {'First Quarter':"#015C91",'Second Quarter':"#2C82B5",
+            'Third Quarter':"#57AEE7",'Fourth Quarter':"#8B9EAA"}
+        font_family = 'Segoe UI, Helvetica Neue, sans-serif'
 
-        dropdown_style = {'backgroundColor':'#FFFFFF',
-                        'color':'black',
-                        'border':'1px',
-                        'border-style':'solid',
-                        'border-color':'black',
-                        'border-radius':'5px',
-                        'font-size':'20px'
+        dropdown_style = {'color':colors['text'],
+                'fontSize':'16px',
+                'fontFamily':font_family
                         } 
         dropdown_div_style = {'margin-bottom':'1%',
                             'width':'70%',
@@ -131,7 +130,7 @@ class Dashboard:
                             'margin-right':'15%'}
         
         self.app.layout =  html.Div([
-                html.H1('Relative Age Effect',style = {'text-align':'center','color': colors['title'],'fontStyle':font_style,'padding-top':'2%'}),
+            html.H1('Relative Age Effect',style = {'textAlign':'center','color': colors['title'],'fontFamily':font_family,'fontWeight':700,'paddingTop':'2%'}),
             
                 html.Div([
                     
@@ -140,6 +139,7 @@ class Dashboard:
                                     options = self.worldcups,
                                     value = self.worldcups[0],
                                     style = dropdown_style,
+                                    className='dropdown-modern',
                                     ),
                         style = dropdown_div_style
                     ),
@@ -148,10 +148,11 @@ class Dashboard:
                         dcc.Dropdown(id = 'teams_dropdown',
                                     options = self.team_names,
                                     value = self.team_names[0],
-                                    style = dropdown_style),
+                                    style = dropdown_style,
+                                    className='dropdown-modern'),
                         style = dropdown_div_style
                     )
-                ]),
+                ], className='dashboard-filters'),
 
                 ############################################################ Tabela #########################################################
             
@@ -159,20 +160,31 @@ class Dashboard:
                     dash_table.DataTable(id ='table',data = self.displayed_team.to_dict('records'),
                                         columns= [{"name": i, "id": i} for i in self.displayed_team.columns],
                                         style_header={
-                                            'backgroundColor':'#212129',
-                                            'color':colors['td'],
-                                            'textAlign':'center',
-                                            'font-size' : '18px'
+                                            'backgroundColor':'#eef2f5',
+                                            'color':colors['text'],
+                                            'textAlign':'left',
+                                            'fontSize': '15px',
+                                            'fontFamily':font_family,
+                                            'fontWeight':600,
+                                            'border':'0',
+                                            'borderBottom':'1px solid #dbe2ea'
                                             
                                         },
                                         style_data={
                                             'backgroundColor':colors['background'],
                                             'color':colors['tr'],
-                                            'textAlign':'center',
+                                            'textAlign':'left',
                                             'height' : '50px',
-                                            'font-size' : '15px'
+                                            'fontSize': '15px',
+                                            'fontFamily':font_family,
+                                            'fontWeight':500,
+                                            'border':'0'
                                         },
                                         style_data_conditional=[
+                                                {
+                                                    'if': {'row_index': 'odd'},
+                                                    'backgroundColor': '#f8fafc'
+                                                },
                                                 {
                                                     'if': {'column_id': ''},
                                                     'minWidth': '200px',  # Set the minimum width for Column 1
@@ -181,7 +193,8 @@ class Dashboard:
                                                     'textOverflow': 'ellipsis'
                                                 },
                                                 {
-                                                    'if': {'column_id': 'Frequence'},
+                                                    'if': {'column_id': 'Frequency'},
+                                                    'textAlign':'right',
                                                     'minWidth': '200px',  # Set the minimum width for Column 2
                                                     'maxWidth': '400px',  # Set the maximum width for Column 2
                                                     'overflow': 'hidden',
@@ -189,138 +202,88 @@ class Dashboard:
                                                 },
                                                                                     {
                                                     'if': {'column_id': 'Percentage(%)'},
+                                                    'textAlign':'right',
                                                     'minWidth': '200px',  # Set the minimum width for Column 3
                                                     'maxWidth': '400px',  # Set the maximum width for Column 3
                                                     'overflow': 'hidden',
                                                     'textOverflow': 'ellipsis'
                                                 }
                                         ],
+                                        style_header_conditional=[
+                                            {'if': {'column_id': 'Frequency'}, 'textAlign': 'right'},
+                                            {'if': {'column_id': 'Percentage(%)'}, 'textAlign': 'right'}
+                                        ],
                                         style_as_list_view=True,
                                         style_table={'height': '35vh'}
                                         ),
                     
-                    style = {'margin-bottom':'1%',
-                            'width':'70%',
-                            'margin-left':'15%',
-                            'margin-right':'15%'}
+                                className='dashboard-card dashboard-card--wide'
                 ),
 
                 ############################################################ Pie Graphs #########################################################
                 html.Div(
                     id = 'pies_title',style = {'text-align':'center',
                                                     'color': colors['title'],
-                                                    'fontStyle':font_style,
-                                                    'padding-top':'2%',
-                                                    'font-size':'1.85em'
-                                                    }),
+                                                    'fontFamily':font_family,
+                                                    'fontWeight':700,
+                                                    'paddingTop':'2%',
+                                                    'fontSize':'1.85em'
+                                                    }, className='dashboard-section-title'),
                 
 
                 html.Div([
                     html.Div(
                         dcc.Graph(id='graph'),
-                        style = {'width':'49%',
-                                'margin-right':'2%',
-                                'display':'inline-block',
-                                'border-color':'#FFFFFF',
-                                'border-radius':'5px'}
+                        className='dashboard-card'
                     ),
 
                     html.Div(
                         dcc.Graph(id='graph2'),
-                        style = {'width':'49%',
-                                'display':'inline-block',
-                                'border-color':'#FFFFFF',
-                                'border-radius':'5px'}
+                        className='dashboard-card'
                     )],
-                    style = {'margin-left':'15%',
-                            'margin-right':'15%',
-                            }
+                    className='dashboard-grid'
                 ),
 
             
                 ############################################################ Box plot #########################################################
 
-                html.Div(
+                html.Div([
                     dcc.Dropdown(id = 'drop_boxplot_over_worldcups',
                                 options = self.name_of_all_teams,
                                 value = self.name_of_all_teams[0],
-                                style = dropdown_style),
-                                style = {'margin-top':'2%',
-                            'margin-bottom':'2%',
-                            'width':'50%',
-                            'margin-left':'25%',
-                            'margin-right':'25%'}
-                    
-                ),
-            
-            
-                html.Div(
-                    dcc.Graph(id = 'boxplot_over_worldcups'),
-                    style = {'margin-left':'15%',
-                            'margin-right':'15%',
-                            }
-                ),
+                                style = dropdown_style,
+                                className='dropdown-modern'),
+                    dcc.Graph(id = 'boxplot_over_worldcups')
+                ], className='dashboard-card dashboard-card--wide'),
             
 
                 # Não modificado
-                html.Div(
+                html.Div([
                     dcc.Dropdown(id = 'wcups_dropdown2',
                                 options = self.worldcups,
                                 value = self.worldcups[0],
                                 style = dropdown_style,
-                                ),
-                            style = {'margin-top':'2%',
-                            'margin-bottom':'2%',
-                            'width':'50%',
-                            'margin-left':'25%',
-                            'margin-right':'25%'}
-                    ),
-            
-            
-            
-            
-                html.Div(
+                                className='dropdown-modern'),
                     dcc.Dropdown(id = 'drop_boxplot_over_worldcups_for_three',
                                 style = dropdown_style,
+                                className='dropdown-modern',
                                 multi = True),
-                    style = {'margin-top':'2%',
-                            'margin-bottom':'2%',
-                            'width':'50%',
-                            'margin-left':'25%',
-                            'margin-right':'25%'}
-                    
-                ),
-            
-            
-                html.Div(
-                    dcc.Graph(id = 'boxplot_over_worldcups_for_three'),
-                    style = {'margin-left':'15%',
-                            'margin-right':'15%',
-                            }
-                ),
+                    dcc.Graph(id = 'boxplot_over_worldcups_for_three')
+                ], className='dashboard-card dashboard-card--wide'),
             
         
             
             
             
-                html.Div(
+                html.Div([
                         dcc.Dropdown(id = 'wcups_dropdown3',
                                     options = self.worldcups,
                                     value = self.worldcups[0],
-                                    style = dropdown_style),
-                    style = {'margin-top':'2%',
-                            'margin-bottom':'2%',
-                            'width':'50%',
-                            'margin-left':'25%',
-                            'margin-right':'25%'}
-                    ),
-            
-                html.Div(
+                                        style = dropdown_style,
+                                        className='dropdown-modern'),
                         dcc.Graph(id='graph3',
-                                style = {'margin':'auto'} ),
-                        style = {'margin-left':'25%',
-                                'margin-right':'25%'}
-                    ),
+                                    style = {'margin':'auto'} )
+                            ], className='dashboard-card dashboard-card--centered'),
                 
             
                 
@@ -354,31 +317,25 @@ class Dashboard:
                 #                }
                 #)   
                 
-                html.Div(
-                    dcc.RangeSlider(id = 'slider',
-                            min = 1930,
-                            max = 2022,
-                            marks = self.slider_marks,
-                            count = 1,
-                            value = [1930,2022]),
-                    style = {'margin-left':'20%',
-                            'margin-right':'20%',
-                            }
-                ),
-            
-                html.Div(
-                    dcc.Graph(id = 'line_chart'
-                            ),
-                    
-                    style = {'margin-left':'15%',
-                                'margin-right':'15%'
-                                }
+                html.Div([
+                    dcc.RangeSlider(id='slider',
+                            min=1930,
+                            max=2022,
+                            marks=self.slider_marks,
+                            count=1,
+                            value=[1930, 2022]),
+                    dcc.Graph(id='line_chart')
+                ],
+                    className='dashboard-card dashboard-card--wide'
                 )
             
             
             
-        ],style = {'color':'white',
-                'backgroundColor':'white'})
+        ], className='dashboard-layout', style = {'color':colors['text'],
+            'backgroundColor':'#f8fafc',
+            'fontFamily':font_family,
+            'fontWeight':500,
+            'minHeight':'100vh'})
 
 
 
@@ -409,21 +366,21 @@ class Dashboard:
                 )
 
             if quarters_df.empty:
-                empty_df = pd.DataFrame(columns=['', 'Frequence', 'Percentage(%)'])
+                empty_df = pd.DataFrame(columns=['', 'Frequency', 'Percentage(%)'])
                 return empty_df.to_dict('records'), [{"name": i, "id": i} for i in empty_df.columns]
 
             freq_row = quarters_df[quarters_df['TYPE'] == 'Frequence']
             perc_row = quarters_df[quarters_df['TYPE'] == 'Percentage(%)']
 
             if freq_row.empty or perc_row.empty:
-                empty_df = pd.DataFrame(columns=['', 'Frequence', 'Percentage(%)'])
+                empty_df = pd.DataFrame(columns=['', 'Frequency', 'Percentage(%)'])
                 return empty_df.to_dict('records'), [{"name": i, "id": i} for i in empty_df.columns]
 
             freq_row = freq_row.iloc[0]
             perc_row = perc_row.iloc[0]
             quarters_df = pd.DataFrame({
-                '': ['Total', 'First_Quarter', 'Second_Quarter', 'Third_Quarter', 'Forth_Quarter'],
-                'Frequence': [freq_row['TOTAL'], freq_row['FIRST_QUARTER'], freq_row['SECOND_QUARTER'], freq_row['THIRD_QUARTER'], freq_row['FORTH_QUARTER']],
+                '': ['Total', 'First Quarter', 'Second Quarter', 'Third Quarter', 'Fourth Quarter'],
+                'Frequency': [freq_row['TOTAL'], freq_row['FIRST_QUARTER'], freq_row['SECOND_QUARTER'], freq_row['THIRD_QUARTER'], freq_row['FORTH_QUARTER']],
                 'Percentage(%)': [perc_row['TOTAL'], perc_row['FIRST_QUARTER'], perc_row['SECOND_QUARTER'], perc_row['THIRD_QUARTER'], perc_row['FORTH_QUARTER']]
             })
             data = quarters_df.to_dict('records')
@@ -486,10 +443,10 @@ class Dashboard:
                 float(freq_row['FORTH_QUARTER'])
             ])
 
-            label_df2 = ['First Quarter','Second Quarter','Third Quarter','Forth Quarter']  
-            colors_pie1 = [colors['First Quarter'],colors['Second Quarter'],colors['Third Quarter'],colors['Forth Quarter']]
+            label_df2 = ['First Quarter','Second Quarter','Third Quarter','Fourth Quarter']
+            colors_pie1 = [pie_colors[label] for label in label_df2]
             min_idx = int(np.argmin(pie_values))
-            smaller_slice_color = colors[label_df2[min_idx]]
+            smaller_slice_color = pie_colors[label_df2[min_idx]]
             fig = go.Figure(data = go.Pie(labels = label_df2,
                                         values = pie_values,
                                         textinfo ='percent',
@@ -503,7 +460,7 @@ class Dashboard:
                             layout = go.Layout(
                                             plot_bgcolor= colors['background'],
                                             paper_bgcolor= colors['background'],
-                                            font_color = 'black')
+                                            font=dict(family=font_family, color=colors['text']))
                                             
                                             )
             fig.update_layout(legend=dict(x=-0.5, y=1))
@@ -532,8 +489,8 @@ class Dashboard:
                 float(freq_row['THIRD_QUARTER']),
                 float(freq_row['FORTH_QUARTER'])
             ])
-            label_df = ['First and Second','Third Quarter','Forth Quarter']
-            colors_pie = ['#099C1D',colors['Third Quarter'],colors['Forth Quarter']]
+            label_df = ['First and Second','Third Quarter','Fourth Quarter']
+            colors_pie = [pie_colors['First Quarter'],pie_colors['Third Quarter'],pie_colors['Fourth Quarter']]
             
             
             fig = go.Figure(data = go.Pie(labels = label_df,
@@ -552,7 +509,7 @@ class Dashboard:
                                 layout = go.Layout(
                                             plot_bgcolor= colors['background'],
                                             paper_bgcolor= colors['background'],
-                                            font_color = colors['text'])
+                                            font=dict(family=font_family, color=colors['text']))
                                             
                                             )
             fig.update_layout(legend=dict(x=-0.8, y=1))
@@ -579,11 +536,11 @@ class Dashboard:
             participated_worldcups = df['PARTICIPATED_YEARS']
 
 
-            N = len(participated_worldcups)
-            c = ['hsl('+str(h)+',100%'+',50%)' for h in np.linspace(40, 260, N)]
+            boxplot_color = "#4D85FF"
 
             fig  = go.Figure(layout = go.Layout(title = {'text':'{} birthdate distribution over the years'.format(selected_team),
                                                 'font':{
+                                                    'family':font_family,
                                                     'color':colors['text'],
                                                     'size':20
                                                 },
@@ -592,7 +549,7 @@ class Dashboard:
                                             plot_bgcolor=colors['background'],
                                             paper_bgcolor= colors['background'],
                                             yaxis = {'title':'Month'},
-                                            font_color = colors['text']))
+                                            font=dict(family=font_family, color=colors['text'])))
 
             for i,wcup_year in enumerate(participated_worldcups):
                 with self.engine.connect() as connection:
@@ -604,7 +561,7 @@ class Dashboard:
                             WHERE TEAMS_NAME = '{selected_team}' AND GAME_YEAR = '{wcup_year}'"
                     df2 = pd.read_sql(query,connection)
                     team_box = df2['BIRTH_MONTH'].values
-                    fig.add_trace(go.Box(y = team_box, name = wcup_year,marker_color = c[i]))
+                    fig.add_trace(go.Box(y=team_box, name=wcup_year, marker_color=boxplot_color, opacity=0.68))
             fig.update_layout(showlegend=False,yaxis = dict(showgrid = False))
             
             return fig
@@ -637,6 +594,7 @@ class Dashboard:
 
             fig  = go.Figure(layout = go.Layout(title = {'text':'{},{} and {} on {} world cup'.format(selected_teams[0],selected_teams[1],selected_teams[2],worldcup_year),
                                                 'font':{
+                                                    'family':font_family,
                                                     'color':colors['text'],
                                                     'size':18
                                                 },
@@ -645,10 +603,10 @@ class Dashboard:
                                             plot_bgcolor=colors['background'],
                                             paper_bgcolor= colors['background'],
                                             yaxis = {'title':'Month'},
-                                            font_color = colors['text']),
+                                            font=dict(family=font_family, color=colors['text'])),
                             )
             
-            for team in selected_teams:
+            for index, team in enumerate(selected_teams):
                 with self.engine.connect() as connection:
             
                     query = f"SELECT PT.NAME,BIRTH_MONTH,THP.TEAMS_NAME \
@@ -659,7 +617,8 @@ class Dashboard:
                                 AND TEAMS_NAME = '{team}'" 
                     df2 = pd.read_sql(query,connection)
                     team_box = df2['BIRTH_MONTH'].values
-                    fig.add_trace(go.Box(y = team_box, name = team))
+                    boxplot_style = {'marker_color': colors['Third Quarter']} if index == 2 else {}
+                    fig.add_trace(go.Box(y=team_box, name=team, **boxplot_style))
             
 
                 
@@ -687,8 +646,8 @@ class Dashboard:
                 values = df2.loc[0].values
                     
 
-            label_df = ['First Quarter','Second Quarter','Third Quarter','Forth Quarter'] 
-            colors_pie = ['#CD0B0B','#FF6C4D','#55B8CE','#005165']
+            label_df = ['First Quarter','Second Quarter','Third Quarter','Fourth Quarter']
+            colors_pie = [pie_colors[label] for label in label_df]
             
             fig = go.Figure(data = go.Pie(labels = label_df,
                                         values = values,
@@ -702,6 +661,7 @@ class Dashboard:
                                         ),
                             layout = go.Layout(title = {'text':'All Teams from {} World Cup'.format(worldcup),
                                                 'font':{
+                                                    'family':font_family,
                                                     'color':colors['text'],
                                                     'size':20
                                                 },
@@ -709,7 +669,7 @@ class Dashboard:
                                                 },
                                             plot_bgcolor=colors['background'],
                                             paper_bgcolor= colors['background'],
-                                            font_color = colors['text'])
+                                            font=dict(family=font_family, color=colors['text']))
                                             )
             fig.update_layout(legend=dict(x=0, y=1))
             
@@ -722,67 +682,67 @@ class Dashboard:
 
 
         @app.callback(Output('line_chart','figure'),
-                    Input('slider','value'))
+            Input('slider','value'))
         def update_line_chart(Range):
             
             
             q_line = self.worldcup_quarters(Range)
             x_range = self.worldcup_list_by_range(Range)
 
-            line_colors = [colors['First Quarter'],colors['Second Quarter'],colors['Third Quarter'],colors['Forth Quarter']]
-            labels = ['First Quarter','Second Quarter','Third Quarter','Forth Quarter']
+            line_colors = [pie_colors['First Quarter'],pie_colors['Second Quarter'],pie_colors['Third Quarter'],pie_colors['Fourth Quarter']]
+            labels = ['First Quarter','Second Quarter','Third Quarter','Fourth Quarter']
             figure = go.Figure(
-                                data = [go.Scatter(x = x_range,y = q_line[0],marker_color = line_colors[0],name = labels[0],mode = 'lines'),
-                                        go.Scatter(x = x_range,y = q_line[1],marker_color = line_colors[1],name = labels[1],mode = 'lines'),
-                                        go.Scatter(x = x_range,y = q_line[2],marker_color = line_colors[2],name = labels[2],mode = 'lines'),
-                                        go.Scatter(x = x_range,y = q_line[3],marker_color = line_colors[3],name = labels[3],mode = 'lines')],
+                                data = [go.Scatter(x=x_range, y=q_line[0], name=labels[0], mode='lines', line=dict(color=line_colors[0], width=3)),
+                                    go.Scatter(x=x_range, y=q_line[1], name=labels[1], mode='lines', line=dict(color=line_colors[1], width=3)),
+                                    go.Scatter(x=x_range, y=q_line[2], name=labels[2], mode='lines', line=dict(color=line_colors[2], width=3)),
+                                    go.Scatter(x=x_range, y=q_line[3], name=labels[3], mode='lines', line=dict(color=line_colors[3], width=3))],
                                 layout = go.Layout(
                                                     
-                                                    xaxis = dict(showgrid = False,
-                                                                tickmode= 'array',
-                                                                tickvals = x_range,
-                                                                ),
-                                                    yaxis = dict(zeroline = False,
+                                            xaxis = dict(showgrid=False,
+                                                showline=True,
+                                                linecolor='#dbe2ea',
+                                                tickmode='linear',
+                                                dtick=8),
+                                            yaxis = dict(zeroline=False,
                                                                 title = 'Birthdate Distribution(%)',
                                                                 range = [10,40],
-                                                                showgrid = False,
-                                                                showspikes = True,
-                                                                ),
+                                                showgrid=False,
+                                                showline=True,
+                                                linecolor='#dbe2ea'),
                                                                 
                                                     margin=dict(
                                                                 autoexpand=False,
-                                                                l=100,
-                                                                r=180,
-                                                                t=110,
-                                                                b = 100,
+                                                                l=70,
+                                                                r=120,
+                                                                t=50,
+                                                                b=60,
                                                                 ),     
                                                     
                                                     plot_bgcolor=colors['background'],
                                                     paper_bgcolor= colors['background'],
-                                                    font_color = colors['text'])
+                                                    font=dict(family=font_family, color=colors['text']))
                                                     )
             
-            annotations = []
-            
-            for y_trace,label,color in zip(q_line,labels,line_colors):
-                annotations.append(dict(xref='paper', x=1, y=y_trace[-1],
-                                            xanchor='left', yanchor='auto',
-                                            text= '{}%  '.format(y_trace[-1]),
-                                            font=dict(family='Arial',
-                                                        size=16,
-                                                    color = color),
-                                            showarrow=False))
-                
-                #annotations.append(dict(xref='paper', x=0, y=y_trace[0],
-                #                             xanchor='left', yanchor='bottom',
-                #                              text= '{}%  '.format(y_trace[0]),
-                #                              font=dict(family='Arial',
-                #                                        size=12,
-                #                                       color = color),
-                #                              showarrow=False))
-                
+            annotations = [
+                dict(
+                    xref='paper',
+                    x=1,
+                    y=series[-1],
+                    xanchor='left',
+                    yanchor='middle',
+                    text='{}%'.format(series[-1]),
+                    font=dict(family=font_family, size=14, color=color),
+                    showarrow=False
+                )
+                for series, color in zip(q_line, line_colors)
+            ]
 
-            figure.update_layout(annotations=annotations,showlegend = True,autosize=False,legend = dict(x=1.05,y=0.9))
+            figure.update_layout(
+                annotations=annotations,
+                showlegend=True,
+                autosize=True,
+                legend=dict(orientation='h', x=0, y=1.12)
+            )
                 
 
             return figure

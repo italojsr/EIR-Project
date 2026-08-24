@@ -104,6 +104,4 @@ python "3 - Dashboard/app.py"
 ---
 
 ## Notes
-
-- The execution order matters: **Web Scrapping -> Database -> Dashboard -> Docker**.
 - After changing Docker environment variables, recreate containers so changes are applied.
