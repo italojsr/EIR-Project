@@ -6,11 +6,11 @@ This project analyzes the Relative Age Effect (RAE) in FIFA World Cup football u
 ## Main Results
 
 1. **Exploratory Data Analysis**
-   -- The percentage of players born in the first quarter of the year is highest (30.2%) among players who have participated in the most World Cup editions
-   -- Consistent with the literature, defender and goalkeeper are the positions with the highest RAE among players who have participated in at least four World Cup editions.
-   -- Using the Odds Ratio, the number of team compositions with significant RAE increases with the number of World Cup editions the team has played in. (e.g., Brazil has played in 22 editions and has 17 compositions with significant RAE)
+   - The percentage of players born in the first quarter of the year is highest (30.2%) among players who have participated in the most World Cup editions
+   - Consistent with the literature, defender and goalkeeper are the positions with the highest RAE among players who have participated in at least four World Cup editions.
+   - Using the Odds Ratio, the number of team compositions with significant RAE increases with the number of World Cup editions the team has played in. (e.g., Brazil has played in 22 editions and has 17 compositions with significant RAE)
 2. **Binary Classification**
-   -- The class imbalance led to poor performance across the three algorithms trained despite the use of data augmentation techniques such as SMOTE.
+   - The class imbalance led to poor performance across the three algorithms trained despite the use of data augmentation techniques such as SMOTE.
 
 ## Project logical order
 
