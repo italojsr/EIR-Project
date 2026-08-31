@@ -220,9 +220,9 @@ class Dashboard:
                                 className='dashboard-card dashboard-card--wide'
                 ),
 
-                ############################################################ Pie Graphs #########################################################
+                ############################################################ Bar Graphs #########################################################
                 html.Div(
-                    id = 'pies_title',style = {'text-align':'center',
+                    id = 'bars_title',style = {'text-align':'center',
                                                     'color': colors['title'],
                                                     'fontFamily':font_family,
                                                     'fontWeight':700,
@@ -316,7 +316,18 @@ class Dashboard:
                 #                'margin-right':'15%',
                 #                }
                 #)   
-                
+                html.Div(
+                    'Birthday Distribution across World Cups',
+                    style={
+                        'text-align': 'center',
+                        'color': colors['title'],
+                        'fontFamily': font_family,
+                        'fontWeight': 700,
+                        'paddingTop': '2%',
+                        'fontSize': '1.85em'
+                    },
+                    className='dashboard-section-title'
+                ),
                 html.Div([
                     dcc.RangeSlider(id='slider',
                             min=1930,
@@ -410,12 +421,12 @@ class Dashboard:
             return teams_options, teams_options[0]
 
 
-        ############################################################## Pie Charts #########################################################
+        ############################################################## Bar Plot  #########################################################
 
-        @app.callback(Output('pies_title','children'),
+        @app.callback(Output('bars_title','children'),
                     [Input('teams_dropdown','value'),
                     Input('wcups_dropdown','value')])
-        def update_pies_title(selected_team,selected_worldcup):
+        def update_bars_title(selected_team,selected_worldcup):
             return "{}'s distribution on {} world cup".format(selected_team,selected_worldcup)
 
 
@@ -436,7 +447,7 @@ class Dashboard:
                 return go.Figure()
 
             freq_row = freq_row.iloc[0]
-            pie_values = np.array([
+            bar_values = np.array([
                 float(freq_row['FIRST_QUARTER']),
                 float(freq_row['SECOND_QUARTER']),
                 float(freq_row['THIRD_QUARTER']),
@@ -444,26 +455,32 @@ class Dashboard:
             ])
 
             label_df2 = ['First Quarter','Second Quarter','Third Quarter','Fourth Quarter']
-            colors_pie1 = [pie_colors[label] for label in label_df2]
-            min_idx = int(np.argmin(pie_values))
-            smaller_slice_color = pie_colors[label_df2[min_idx]]
-            fig = go.Figure(data = go.Pie(labels = label_df2,
-                                        values = pie_values,
-                                        textinfo ='percent',
+            bar_colors = [pie_colors[label] for label in label_df2]
+            fig = go.Figure(data = go.Bar(
+                                        y = label_df2,
+                                        x = bar_values,
+                                        orientation = 'h',
                                         name = 'Gráfico1',
-                                        marker = dict(colors = colors_pie1),
-                                        textfont_size = 20,
-                                        sort = False, # 
-                                        direction = 'clockwise', # Sectors are organized in clockwise order
-                                        insidetextfont = dict(color = 'white'), #Set the color for the text inside sectors
-                                        outsidetextfont = dict(color = smaller_slice_color)),#Set the color for the text outside sectors
+                                        marker = dict(color = bar_colors),
+                                        text = bar_values,
+                                        texttemplate = '<b>%{text:.0f}</b>',
+                                        textposition = 'outside'),
                             layout = go.Layout(
                                             plot_bgcolor= colors['background'],
                                             paper_bgcolor= colors['background'],
                                             font=dict(family=font_family, color=colors['text']))
-                                            
                                             )
-            fig.update_layout(legend=dict(x=-0.5, y=1))
+            fig.update_layout(
+                showlegend=False,
+                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                yaxis=dict(
+                    autorange='reversed',
+                    tickmode='array',
+                    tickvals=label_df2,
+                    ticktext=[f'<b>{label}</b>' for label in label_df2],
+                    tickfont=dict(size=15)
+                )
+            )
             
             
             return fig
@@ -484,35 +501,40 @@ class Dashboard:
                 return go.Figure()
 
             freq_row = freq_row.iloc[0]
-            pie_values = np.array([
+            bar_values = np.array([
                 float(freq_row['FIRST_AND_SECOND_QUARTER']),
                 float(freq_row['THIRD_QUARTER']),
                 float(freq_row['FORTH_QUARTER'])
             ])
             label_df = ['First and Second','Third Quarter','Fourth Quarter']
-            colors_pie = [pie_colors['First Quarter'],pie_colors['Third Quarter'],pie_colors['Fourth Quarter']]
+            bar_colors = [pie_colors['First Quarter'],pie_colors['Third Quarter'],pie_colors['Fourth Quarter']]
             
             
-            fig = go.Figure(data = go.Pie(labels = label_df,
-                                        values = pie_values,
-                                        
-                                        textinfo ='percent',
+            fig = go.Figure(data = go.Bar(
+                                        y = label_df,
+                                        x = bar_values,
+                                        orientation = 'h',
                                         name = 'Gráfico2',
-                                        sort = False,
-                                        direction = 'clockwise',
-                                        marker = dict(colors = colors_pie),
-                                        textfont_size = 20,
-                                        insidetextfont = dict(color = 'white'),
-                                        ),
-                                        
-                                        
-                                layout = go.Layout(
+                                        marker = dict(color = bar_colors),
+                                        text = bar_values,
+                                        texttemplate = '<b>%{text:.0f}</b>',
+                                        textposition = 'outside'),
+                            layout = go.Layout(
                                             plot_bgcolor= colors['background'],
                                             paper_bgcolor= colors['background'],
                                             font=dict(family=font_family, color=colors['text']))
-                                            
                                             )
-            fig.update_layout(legend=dict(x=-0.8, y=1))
+            fig.update_layout(
+                showlegend=False,
+                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                yaxis=dict(
+                    autorange='reversed',
+                    tickmode='array',
+                    tickvals=label_df,
+                    ticktext=[f'<b>{label}</b>' for label in label_df],
+                    tickfont=dict(size=15)
+                )
+            )
 
 
             return fig
@@ -538,11 +560,11 @@ class Dashboard:
 
             boxplot_color = "#4D85FF"
 
-            fig  = go.Figure(layout = go.Layout(title = {'text':'{} birthdate distribution over the years'.format(selected_team),
+            fig  = go.Figure(layout = go.Layout(title = {'text':'<b>{} birthdate distribution over the years</b>'.format(selected_team),
                                                 'font':{
                                                     'family':font_family,
                                                     'color':colors['text'],
-                                                    'size':20
+                                                    'size':30
                                                 },
                                                 'x':0.5
                                                 },
@@ -592,11 +614,11 @@ class Dashboard:
             worldcup_year = worldcup.split(' ')[0]
 
 
-            fig  = go.Figure(layout = go.Layout(title = {'text':'{},{} and {} on {} world cup'.format(selected_teams[0],selected_teams[1],selected_teams[2],worldcup_year),
+            fig  = go.Figure(layout = go.Layout(title = {'text':'<b>{},{} and {} on {} world cup</b>'.format(selected_teams[0],selected_teams[1],selected_teams[2],worldcup_year),
                                                 'font':{
                                                     'family':font_family,
                                                     'color':colors['text'],
-                                                    'size':18
+                                                    'size':30
                                                 },
                                                 'x':0.5
                                                 },
@@ -654,12 +676,12 @@ class Dashboard:
                                         textinfo ='percent',
                                         name = 'Gráfico3',
                                         marker = dict(colors = colors_pie),
-                                        textfont_size = 20,
+                                        textfont_size = 15,
                                         insidetextfont = dict(color = 'white'),
                                         sort = False,
                                         direction = 'clockwise'
                                         ),
-                            layout = go.Layout(title = {'text':'All Teams from {} World Cup'.format(worldcup),
+                            layout = go.Layout(title = {'text':'<b>All Teams from {} World Cup</b>'.format(worldcup),
                                                 'font':{
                                                     'family':font_family,
                                                     'color':colors['text'],
