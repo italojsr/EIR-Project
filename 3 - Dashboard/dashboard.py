@@ -214,7 +214,7 @@ class Dashboard:
                                             {'if': {'column_id': 'Percentage(%)'}, 'textAlign': 'right'}
                                         ],
                                         style_as_list_view=True,
-                                        style_table={'height': '35vh'}
+                                        style_table={'minHeight': '0'}
                                         ),
                     
                                 className='dashboard-card dashboard-card--wide'
